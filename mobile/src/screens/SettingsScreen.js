@@ -36,18 +36,21 @@ export default function SettingsScreen() {
     await storage.setApiUrl(apiUrl.trim());
     await storage.setApiKey(apiKey.trim());
     Alert.alert("Saved", "Backend URL and API Key updated successfully.");
-    testConnection();
+    testConnection(apiUrl.trim(), apiKey.trim());
   };
 
-  const testConnection = async () => {
+  const testConnection = async (overrideUrl, overrideKey) => {
     setTesting(true);
     setConnectionStatus(null);
     setStatusMessage("");
     try {
-      const res = await api.getHealth();
-      if (res && res.status === "healthy") {
+      const targetUrl = overrideUrl || apiUrl || (await storage.getApiUrl());
+      const targetKey = overrideKey !== undefined ? overrideKey : apiKey;
+
+      const res = await api.testConnection(targetUrl, targetKey);
+      if (res && res.success) {
         setConnectionStatus("connected");
-        setStatusMessage(`Connected! Stocks cached: ${res.stocks_cached ? "Yes" : "No"}`);
+        setStatusMessage(`Connected! API Key verified & stocks cached: ${res.stocks_cached ? "Yes" : "No"}`);
       } else {
         setConnectionStatus("failed");
         setStatusMessage("Server returned an unexpected response.");
@@ -59,6 +62,7 @@ export default function SettingsScreen() {
       setTesting(false);
     }
   };
+
 
   const handleTriggerRefresh = async () => {
     setRefreshingBackend(true);

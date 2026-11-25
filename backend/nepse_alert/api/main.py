@@ -83,6 +83,13 @@ def health_check():
     }
 
 
+@app.get("/api/auth/verify", dependencies=[Depends(verify_api_key)])
+def verify_auth():
+    """Validates whether the provided API Key is accepted by the server."""
+    return {"authenticated": True, "message": "API Key is valid."}
+
+
+
 from nepse_alert.engine.scheduler import get_market_session
 
 

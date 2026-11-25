@@ -119,8 +119,16 @@ def test_api_key_protection():
         # 3. Request with correct key should succeed
         res_ok = client.post("/api/watchlist", json={"symbol": "NABIL"}, headers={"X-API-Key": "super-secret-key-123"})
         assert res_ok.status_code == 200
+
+        # 4. Auth verify endpoint
+        assert client.get("/api/auth/verify").status_code == 401
+        assert client.get("/api/auth/verify", headers={"X-API-Key": "wrong-key"}).status_code == 401
+        res_verify = client.get("/api/auth/verify", headers={"X-API-Key": "super-secret-key-123"})
+        assert res_verify.status_code == 200
+        assert res_verify.json()["authenticated"] is True
     finally:
         config.API_KEY = original_key
+
 
 
 def test_screener_engine_logic():

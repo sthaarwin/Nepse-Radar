@@ -45,6 +45,64 @@ export const api = {
     return await this.request("/api/health");
   },
 
+  async testConnection(targetUrl, targetApiKey) {
+    const cleanUrl = (targetUrl || "").trim().replace(/\/$/, "");
+    const cleanKey = (targetApiKey || "").trim();
+
+    // 1. Verify server reachability
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    let healthRes;
+    try {
+      healthRes = await fetch(`${cleanUrl}/api/health`, {
+        signal: controller.signal,
+        headers: { Accept: "application/json" }
+      });
+    } catch (e) {
+      clearTimeout(timeoutId);
+      throw new Error("Cannot reach server. Please check the URL.");
+    }
+    clearTimeout(timeoutId);
+
+    if (!healthRes.ok) {
+      throw new Error(`Server returned HTTP ${healthRes.status}`);
+    }
+    const healthData = await healthRes.json();
+
+    // 2. Verify API Key validity
+    const authController = new AbortController();
+    const authTimeout = setTimeout(() => authController.abort(), 10000);
+
+    let authRes;
+    try {
+      authRes = await fetch(`${cleanUrl}/api/auth/verify`, {
+        signal: authController.signal,
+        headers: {
+          Accept: "application/json",
+          ...(cleanKey ? { "X-API-Key": cleanKey } : {})
+        }
+      });
+    } catch (e) {
+      clearTimeout(authTimeout);
+      throw new Error("Authentication request failed.");
+    }
+    clearTimeout(authTimeout);
+
+    if (authRes.status === 401) {
+      throw new Error("Invalid API Key (401 Unauthorized)");
+    }
+    if (!authRes.ok) {
+      throw new Error(`Authentication check failed: HTTP ${authRes.status}`);
+    }
+
+    return {
+      success: true,
+      stocks_cached: healthData.stocks_cached
+    };
+  },
+
+
   async getMarketOverview() {
     try {
       return await this.request("/api/market");
