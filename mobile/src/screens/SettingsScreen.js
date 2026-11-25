@@ -44,13 +44,20 @@ export default function SettingsScreen() {
     setConnectionStatus(null);
     setStatusMessage("");
     try {
-      const targetUrl = overrideUrl || apiUrl || (await storage.getApiUrl());
-      const targetKey = overrideKey !== undefined ? overrideKey : apiKey;
+      const explicitUrl = typeof overrideUrl === "string" ? overrideUrl : null;
+      const explicitKey = typeof overrideKey === "string" ? overrideKey : null;
+
+      const targetUrl = (explicitUrl !== null ? explicitUrl : (apiUrl || (await storage.getApiUrl()) || "")).trim();
+      const targetKey = (explicitKey !== null ? explicitKey : (apiKey || "")).trim();
 
       const res = await api.testConnection(targetUrl, targetKey);
       if (res && res.success) {
         setConnectionStatus("connected");
-        setStatusMessage(`Connected! API Key verified & stocks cached: ${res.stocks_cached ? "Yes" : "No"}`);
+        setStatusMessage(
+          res.authenticated
+            ? `Connected! API Key verified & stocks cached: ${res.stocks_cached ? "Yes" : "No"}`
+            : `Connected! Public read-only (Stocks cached: ${res.stocks_cached ? "Yes" : "No"})`
+        );
       } else {
         setConnectionStatus("failed");
         setStatusMessage("Server returned an unexpected response.");
@@ -124,7 +131,7 @@ export default function SettingsScreen() {
 
             <TouchableOpacity
               style={styles.testBtn}
-              onPress={testConnection}
+              onPress={() => testConnection()}
               disabled={testing}
               activeOpacity={0.8}
             >

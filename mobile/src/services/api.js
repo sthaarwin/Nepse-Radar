@@ -46,8 +46,12 @@ export const api = {
   },
 
   async testConnection(targetUrl, targetApiKey) {
-    const cleanUrl = (targetUrl || "").trim().replace(/\/$/, "");
-    const cleanKey = (targetApiKey || "").trim();
+    const cleanUrl = (typeof targetUrl === "string" ? targetUrl : "").trim().replace(/\/$/, "");
+    const cleanKey = (typeof targetApiKey === "string" ? targetApiKey : "").trim();
+
+    if (!cleanUrl) {
+      throw new Error("URL is empty or invalid.");
+    }
 
     // 1. Verify server reachability
     const controller = new AbortController();
@@ -70,35 +74,40 @@ export const api = {
     }
     const healthData = await healthRes.json();
 
-    // 2. Verify API Key validity
-    const authController = new AbortController();
-    const authTimeout = setTimeout(() => authController.abort(), 10000);
+    // 2. Verify API Key validity if provided
+    let authenticated = false;
+    if (cleanKey) {
+      const authController = new AbortController();
+      const authTimeout = setTimeout(() => authController.abort(), 10000);
 
-    let authRes;
-    try {
-      authRes = await fetch(`${cleanUrl}/api/auth/verify`, {
-        signal: authController.signal,
-        headers: {
-          Accept: "application/json",
-          ...(cleanKey ? { "X-API-Key": cleanKey } : {})
-        }
-      });
-    } catch (e) {
+      let authRes;
+      try {
+        authRes = await fetch(`${cleanUrl}/api/auth/verify`, {
+          signal: authController.signal,
+          headers: {
+            Accept: "application/json",
+            "X-API-Key": cleanKey
+          }
+        });
+      } catch (e) {
+        clearTimeout(authTimeout);
+        throw new Error("Authentication request failed or timed out.");
+      }
       clearTimeout(authTimeout);
-      throw new Error("Authentication request failed.");
-    }
-    clearTimeout(authTimeout);
 
-    if (authRes.status === 401) {
-      throw new Error("Invalid API Key (401 Unauthorized)");
-    }
-    if (!authRes.ok) {
-      throw new Error(`Authentication check failed: HTTP ${authRes.status}`);
+      if (authRes.status === 401) {
+        throw new Error("Invalid API Key (401 Unauthorized)");
+      }
+      if (!authRes.ok) {
+        throw new Error(`Authentication check failed: HTTP ${authRes.status}`);
+      }
+      authenticated = true;
     }
 
     return {
       success: true,
-      stocks_cached: healthData.stocks_cached
+      authenticated,
+      stocks_cached: !!healthData.stocks_cached
     };
   },
 
