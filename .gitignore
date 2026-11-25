@@ -1,0 +1,64 @@
+# Environment & Secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.token
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+backend/venv/
+venv/
+backend/.pytest_cache/
+.pytest_cache/
+*.egg-info/
+backend/*.egg-info/
+backend/dist/
+backend/build/
+
+# SQLite databases & logs
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+backend/data/*.db
+backend/data/*.db-journal
+*.log
+
+# Node / React Native / Expo
+node_modules/
+mobile/node_modules/
+.expo/
+mobile/.expo/
+dist/
+web-build/
+*.hbc
+
+# Android Builds & Local SDK
+*.apk
+*.aab
+*.ap_
+*.dex
+NepseRadar-release.apk
+mobile/android/.gradle/
+mobile/android/app/build/
+mobile/android/build/
+mobile/android/local.properties
+mobile/android/.cxx/
+mobile/android/*.iml
+mobile/android/app/*.iml
+mobile/android/gradle/gradle-daemon-jvm.properties
+mobile/android/app/src/main/java/inline/
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/

@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  nepseradar-backend:
+    build: .
+    container_name: nepseradar-backend
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - nepseradar-data:/app/data
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+      - REFRESH_INTERVAL_MINUTES=10
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  nepseradar-data:
