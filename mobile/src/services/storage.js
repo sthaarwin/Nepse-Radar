@@ -8,8 +8,9 @@ const STORAGE_KEYS = {
 };
 
 // Default production backend URL & Key (Cloudflare Tunnel to Oracle Cloud)
-export const DEFAULT_API_URL = "https://petersburg-nokia-top-pose.trycloudflare.com";
+export const DEFAULT_API_URL = "https://nepse.arwinshrestha.com.np";
 export const DEFAULT_API_KEY = "";
+
 
 export const storage = {
   async getApiUrl() {
