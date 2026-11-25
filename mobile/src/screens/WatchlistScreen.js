@@ -8,7 +8,9 @@ import {
   RefreshControl,
   ActivityIndicator,
   TextInput,
-  Modal
+  Modal,
+  Platform,
+  StatusBar
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../theme/colors";
@@ -258,7 +260,8 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: colors.background
+    backgroundColor: colors.background,
+    paddingTop: Platform.OS === "android" ? Math.max(StatusBar.currentHeight || 0, 34) : 0
   },
   modalTopBar: {
     flexDirection: "row",
