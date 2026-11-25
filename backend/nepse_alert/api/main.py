@@ -83,19 +83,31 @@ def health_check():
     }
 
 
+from nepse_alert.engine.scheduler import get_market_session
+
+
+@app.get("/api/market/status")
+def get_market_trading_status():
+    """Returns real-time NEPSE market session status, next opening time, and trading window info."""
+    return get_market_session()
+
+
 @app.get("/api/market")
 def get_market_overview():
     summary = get_market_summary()
+    market_status = get_market_session()
     top_gainers = get_stocks(limit=5, sort_by="gainers")
     top_losers = get_stocks(limit=5, sort_by="losers")
     top_turnover = get_stocks(limit=5, sort_by="turnover")
     
     return {
         "summary": summary,
+        "market_status": market_status,
         "top_gainers": top_gainers,
         "top_losers": top_losers,
         "top_turnover": top_turnover
     }
+
 
 
 @app.get("/api/stocks")

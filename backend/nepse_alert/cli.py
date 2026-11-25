@@ -77,20 +77,18 @@ def run_serve():
     uvicorn.run("nepse_alert.api.main:app", host=HOST, port=PORT, reload=False)
 
 
-def run_scheduler():
+from nepse_alert.engine.scheduler import run_smart_scheduler_loop
+
+
+def run_scheduler(single_run: bool = False):
     init_db()
-    logger.info(f"NepseRadar Scheduler running every {REFRESH_INTERVAL_MINUTES} minutes...")
-    while True:
-        try:
-            run_ingest()
-        except Exception as e:
-            logger.error(f"Error during scheduled run: {e}")
-        time.sleep(REFRESH_INTERVAL_MINUTES * 60)
+    run_smart_scheduler_loop(single_run=single_run)
 
 
 def main():
     parser = argparse.ArgumentParser(description="NepseRadar CLI Tool")
     parser.add_argument("command", choices=["ingest", "screen", "serve", "scheduler"], help="Command to execute")
+    parser.add_argument("--once", action="store_true", help="Run once and exit (for testing or crontab)")
     args = parser.parse_args()
 
     if args.command == "ingest":
@@ -100,7 +98,8 @@ def main():
     elif args.command == "serve":
         run_serve()
     elif args.command == "scheduler":
-        run_scheduler()
+        run_scheduler(single_run=args.once)
+
 
 
 if __name__ == "__main__":

@@ -35,7 +35,11 @@ VOLUME_SURGE_MULTIPLIER = 1.5  # 1.5x of 120-day average
 NEAR_52W_HIGH_PCT = 0.05  # within 5% of 52w high
 NEAR_52W_LOW_PCT = 0.05   # within 5% of 52w low
 
-# Server Settings
 HOST = os.getenv("HOST", "0.0.0.0")
 PORT = int(os.getenv("PORT", 8000))
-REFRESH_INTERVAL_MINUTES = int(os.getenv("REFRESH_INTERVAL_MINUTES", 10))
+REFRESH_INTERVAL_MINUTES = int(os.getenv("REFRESH_INTERVAL_MINUTES", 5))
+
+# Smart Scheduler Settings (Nepal Trading Hours: Sun-Thu 11:00 AM - 3:00 PM NPT)
+MARKET_HOURS_INTERVAL_MINUTES = int(os.getenv("MARKET_HOURS_INTERVAL_MINUTES", 5))
+OFF_HOURS_NEWS_INTERVAL_MINUTES = int(os.getenv("OFF_HOURS_NEWS_INTERVAL_MINUTES", 60))
+

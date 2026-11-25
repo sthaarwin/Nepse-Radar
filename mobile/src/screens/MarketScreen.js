@@ -51,17 +51,27 @@ export default function MarketScreen({ watchlist, onToggleWatchlist }) {
   };
 
   const summary = marketData?.summary || {};
+  const marketStatus = marketData?.market_status;
   const turnoverCr = summary.total_turnover ? (summary.total_turnover / 10_000_000).toFixed(2) : "0.00";
   const isIndexPositive = (summary.index_change || 0) >= 0;
+
+  const getSubtitle = () => {
+    if (!marketStatus) return "Nepal Stock Exchange Live";
+    if (marketStatus.is_open) return "🟢 Live Trading (11:00 - 15:00)";
+    if (marketStatus.status === "PRE_OPEN") return "🟡 Pre-Open Session (10:30 - 11:00)";
+    if (marketStatus.status === "POST_CLOSE") return "🔵 Post-Close Reconciliation";
+    return `🔴 Market Closed (${marketStatus.day_name || "Off-hours"})`;
+  };
 
   return (
     <View style={styles.container}>
       <Header
         title="NepseRadar"
-        subtitle="Nepal Stock Exchange Live"
+        subtitle={getSubtitle()}
         onRefresh={onRefresh}
         isRefreshing={refreshing}
       />
+
 
       {loading ? (
         <View style={styles.loader}>

@@ -81,24 +81,26 @@ def test_suggestions_endpoint():
 
 def test_watchlist_crud_and_validation():
     test_symbol = "TESTSTOCK"
+    headers = {"X-API-Key": config.API_KEY} if config.API_KEY else {}
     
     # 1. Add to watchlist
-    res_add = client.post("/api/watchlist", json={"symbol": test_symbol, "target_price": 500.0, "notes": "Test stock note"})
+    res_add = client.post("/api/watchlist", json={"symbol": test_symbol, "target_price": 500.0, "notes": "Test stock note"}, headers=headers)
     assert res_add.status_code == 200
     
     # 2. Check watchlist
-    res_list = client.get("/api/watchlist")
+    res_list = client.get("/api/watchlist", headers=headers)
     assert res_list.status_code == 200
     symbols = [w["symbol"] for w in res_list.json()["watchlist"]]
     assert test_symbol in symbols
     
     # 3. Delete from watchlist
-    res_del = client.delete(f"/api/watchlist/{test_symbol}")
+    res_del = client.delete(f"/api/watchlist/{test_symbol}", headers=headers)
     assert res_del.status_code == 200
 
     # 4. Input validation: invalid symbol rejected
-    res_invalid = client.post("/api/watchlist", json={"symbol": "INVALID SYMBOL!@#", "target_price": -50.0})
+    res_invalid = client.post("/api/watchlist", json={"symbol": "INVALID SYMBOL!@#", "target_price": -50.0}, headers=headers)
     assert res_invalid.status_code == 422
+
 
 
 def test_api_key_protection():
